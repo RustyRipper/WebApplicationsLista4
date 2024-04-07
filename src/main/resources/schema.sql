@@ -60,3 +60,8 @@ alter table request_event
     add constraint FK_req_ev_event foreign key (server_id) references server;
 alter table sql_event
     add constraint FK__sql_ev_server foreign key (server_id) references server;
+
+ALTER TABLE server
+    ADD created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE server
+    ADD is_active BOOLEAN DEFAULT TRUE;

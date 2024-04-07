@@ -3,18 +3,20 @@ package com.capgemini.jpa.tasks;
 import com.capgemini.jpa.configuration.AuditingConfiguration;
 import com.capgemini.jpa.entities.Server;
 import com.capgemini.jpa.repositories.ServerRepository;
+import org.hibernate.LazyInitializationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.transaction.TestTransaction;
 
-import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataJpaTest
@@ -25,7 +27,7 @@ class Task1 {
     private ServerRepository serverRepository;
 
     @Test
-    void shouldIncrementVersionCounterOnSave() throws Exception {
+    void shouldIncrementVersionCounterOnSave() {
         // given
         Server server = serverRepository.getById(1L);
         Long currentVersion = server.getVersion();
@@ -41,7 +43,7 @@ class Task1 {
 
 
     @Test
-    void shouldSetCreatedDateOnServerDuringSave() throws Exception {
+    void shouldSetCreatedDateOnServerDuringSave() {
         // given
         Server server = new Server("server1", "138.0.1.5");
 
@@ -53,7 +55,7 @@ class Task1 {
     }
 
     @Test
-    void shouldUpdateLastUpdateDateOnServerAfterUpdate() throws Exception {
+    void shouldUpdateLastUpdateDateOnServerAfterUpdate() {
         // given
         Server server = serverRepository.getById(1L);
         LocalDateTime base = LocalDateTime.now();
@@ -68,7 +70,7 @@ class Task1 {
     }
 
     @Test
-    void shouldPerformSoftDelete() throws Exception {
+    void shouldPerformSoftDelete() {
         // given
         Server server = new Server("server 1", "138.0.2.5");
         serverRepository.saveAndFlush(server); // we need to force a flush to demonstrate the feature, under normal execution this would happen during transaction commit
@@ -78,6 +80,7 @@ class Task1 {
         TestTransaction.end();
 
         // then
-        assertThrows( EntityNotFoundException.class, () -> serverRepository.getById(server.getId()));
+        assertEquals(Optional.empty(), serverRepository.findById(server.getId()));
+        assertThrows( LazyInitializationException.class, () -> serverRepository.getById(server.getId()).toString());
     }
 }

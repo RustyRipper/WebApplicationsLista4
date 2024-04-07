@@ -1,9 +1,12 @@
 package com.capgemini.jpa.tasks;
 
 import com.capgemini.jpa.entities.Event;
+import com.capgemini.jpa.repositories.EventRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
@@ -15,10 +18,11 @@ import static org.hamcrest.Matchers.notNullValue;
 
 @DataJpaTest
 class Task2 {
-
+    @Autowired
+    private EventRepository eventRepository;
 
     @Test
-    void shouldFindOneEntryBetweenDatesThatMustBeAnalyzed() throws Exception {
+    void shouldFindOneEntryBetweenDatesThatMustBeAnalyzed() {
         // given
         LocalDateTime start = LocalDateTime.of(2018, 4, 9, 3, 25);
         LocalDateTime end = LocalDateTime.of(2018, 4, 9, 3, 26);
@@ -28,7 +32,7 @@ class Task2 {
         Sort sort = Sort.unsorted();
 
         // when
-        Page<Event> result = null;
+        Page<Event> result = eventRepository.findByTimeBetweenAndAnalysisRequiredEquals(start, end, toBeAnalyzed, PageRequest.of(page, pageSize, sort));
 
         // then
         assertThat(result, is(notNullValue()));
@@ -36,7 +40,7 @@ class Task2 {
     }
 
     @Test
-    void shouldReturnThirdPageOfEventsSortedByTime() throws Exception {
+    void shouldReturnThirdPageOfEventsSortedByTime() {
         // given
         LocalDateTime start = LocalDateTime.of(2016, 1, 1, 0, 0);
         LocalDateTime end = LocalDateTime.of(2019, 12, 31, 0, 0);
@@ -46,7 +50,7 @@ class Task2 {
         Sort sort = Sort.by("time");
 
         // when
-        Page<Event> result = null;
+        Page<Event> result = eventRepository.findByTimeBetweenAndAnalysisRequiredEquals(start, end, toBeAnalyzed, PageRequest.of(page, pageSize, sort));
 
         // then
         assertThat(result, is(notNullValue()));
@@ -56,7 +60,7 @@ class Task2 {
     }
 
     @Test
-    void shouldReturnEmptyPage() throws Exception {
+    void shouldReturnEmptyPage() {
         // given
         LocalDateTime start = LocalDateTime.of(2020, 1, 1, 0, 0);
         LocalDateTime end = LocalDateTime.of(2021, 12, 31, 0, 0);
@@ -66,10 +70,10 @@ class Task2 {
         Sort sort = Sort.by("time");
 
         // when
-        Page<Event> result = null;
+        Page<Event> result = eventRepository.findByTimeBetweenAndAnalysisRequiredEquals(start, end, toBeAnalyzed, PageRequest.of(page, pageSize, sort));
 
         // then
-        assertThat(result.getTotalElements(), is(0));
+        assertThat(result.getTotalElements(), is(0L));
         assertThat(result.getContent(), hasSize(0));
     }
 }
