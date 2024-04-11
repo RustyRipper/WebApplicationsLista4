@@ -77,9 +77,10 @@ class Task1 {
 
         // when
         serverRepository.deleteById(server.getId());
-        TestTransaction.end();
 
         // then
+        assertEquals(Optional.empty(), serverRepository.findById(server.getId()));
+        TestTransaction.end();
         assertEquals(Optional.empty(), serverRepository.findById(server.getId()));
         assertThrows( LazyInitializationException.class, () -> serverRepository.getById(server.getId()).toString());
     }
